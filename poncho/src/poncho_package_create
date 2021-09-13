@@ -125,7 +125,6 @@ def check_spec(spec, out_dir):
     conda_spec['channels'] = []
     conda_spec['dependencies'] = []
     conda_spec['name'] = 'base'
- 
     if 'conda' in data:
         for  channel in data['conda']['channels']:
             if channel not in conda_spec['channels']:

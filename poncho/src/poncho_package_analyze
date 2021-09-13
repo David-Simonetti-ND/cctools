@@ -107,9 +107,15 @@ def search_pkg(overrides, conda_env, pip_env, conda_pkgs, pip_pkgs, pkg):
     for a in conda_env:
         if a.find("python=") == 0:
             python_version = int(a[7]+a[9])
-    conda_search_package_json = json.loads(subprocess.check_output(['conda', 'search', pkg, '--json']))
+    try:
+        conda_search_package_json = json.loads(subprocess.check_output(['conda', 'search', pkg, '--json']))
+    except:
+        return
     #print(conda_search_package_json)
-    number_of_packages_found = len(conda_search_package_json[pkg])
+    try:
+        number_of_packages_found = len(conda_search_package_json[pkg])
+    except:
+        return
     #package_versions = []
     #for i in range(number_of_packages_found):
     #    try:
