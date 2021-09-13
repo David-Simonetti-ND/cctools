@@ -107,22 +107,23 @@ def search_pkg(overrides, conda_env, pip_env, conda_pkgs, pip_pkgs, pkg):
     for a in conda_env:
         if a.find("python=") == 0:
             python_version = int(a[7]+a[9])
-    conda_search_package_json = json.loads(subprocess.check_output(['conda', 'search', 'seaborn', '--json']))
-    number_of_packages_found = len(conda_search_package_json['seaborn'])
-    package_versions = []
-    for i in range(number_of_packages_found):
-        try:
-            package_versions.append(int(conda_search_package_json['seaborn'][i]['build'][2:4]))
-        except:
-            continue
-    package_versions.sort()
-    package_selection = 0
-    for i in range(len(package_versions)):
-        if python_version < package_versions[i]:
-            package_selection = i - 1
-            break
-    conda_search_package = "=".join(conda_search_package_json['seaborn'][package_selection]['fn'].split("-")[0:2])
-    print(conda_search_package)
+    conda_search_package_json = json.loads(subprocess.check_output(['conda', 'search', pkg, '--json']))
+    #print(conda_search_package_json)
+    number_of_packages_found = len(conda_search_package_json[pkg])
+    #package_versions = []
+    #for i in range(number_of_packages_found):
+    #    try:
+    #        package_versions.append(int(conda_search_package_json[pkg][i]['build'][2:4]))
+    #    except:
+    #        continue
+    #package_versions.sort()
+    #package_selection = 0
+    #for i in range(len(package_versions)):
+    #    if python_version < package_versions[i]:
+    #        package_selection = i - 1
+    #        break
+    #conda_search_package = "=".join(conda_search_package_json[pkg][package_selection]['fn'].split("-")[0:2])
+    conda_search_package = "=".join( (conda_search_package_json[pkg][number_of_packages_found-1]['fn'].split(".tar")[0].split(".conda")[0]).split("-") ) 
     conda_env.append(conda_search_package)
     choose_dep(conda_env, pip_env, conda_pkgs, pip_pkgs, conda_search_package.split("=")[0])
     return
