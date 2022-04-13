@@ -1,5 +1,8 @@
+#! /usr/bin/env python
+
 import socket
 import json
+import os
 
 '''
 The function signature should always be the same, but what is actually
@@ -11,36 +14,63 @@ def function_handler(event):
 	return int(event["a"]) + int(event["b"])
 
 def main():
-	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	
+	initialppid = os.getppid()
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	try:
-		s.bind(('localhost', 45107))
+		# modify the port argument to be 0 to listen on an arbitrary port
+		s.bind(('localhost', 0))
 	except Exception as e:
 		s.close()
 		print(e)
 		exit(1)
 
+	# information to print to stdout for worker
+	name = "my_func"
+	port = s.getsockname()[1]
+	_type = "python"	
+
+	print(json.dumps({"name": name, "port": port, "type": _type, "version": "1.1"}), flush=True)
+
 	while True:
-		print('listening on port: {}\n'.format(s.getsockname()[1]))
-		
-		# receive message from worker
-		event, addr = s.recvfrom(1024)
-		event = json.loads(event)
-		print('received message: {} from {}'.format(event, addr))
+		s.listen()
+		conn, addr = s.accept()
+		print('Connection from {}'.format(addr))
+		while True:
+			# peek at message to find newline to get the size
+			event_size = None
+			line = conn.recv(100, socket.MSG_PEEK)
+			eol = line.find(b'\n')
+			if eol >= 0:
+				size = eol+1
+				# actually read the size of the event
+				event_size = int(conn.recv(size).decode('utf-8').split()[1])
 
-		'''
-		Once we have received the function input, we need to call that function somehow
-		- How do we actually get the function over here?
-		'''
+			if event_size:
+				# receive the event itself
+				event = conn.recv(event_size)
 
-		result = function_handler(event)
+				event = json.loads(event)
+				print('event: {}'.format(event))
 
-		response = {
-			"Result": result,
-			"StatusCode": "200",
-		}
-		# respond to worker
-		s.sendto(json.dumps(response).encode('utf-8'), addr)
+				result = function_handler(event)
+
+				response = {
+					"Result": result,
+					"StatusCode": 200
+				}
+
+				response = json.dumps(response)
+				response_size = len(response)
+
+				size_msg = "data {}\n".format(response_size)
+
+				# send the size of response
+				conn.sendall(size_msg.encode('utf-8'))
+
+				# send response
+				conn.sendall(response.encode('utf-8'))
+
+				break
 
 	return 0
 
