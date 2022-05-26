@@ -283,7 +283,7 @@ char *work_queue_coprocess_run(const char *function_name, const char *function_i
 	link_read(link, buf, length, stoptime);
 
 	char *output = calloc(strlen(buf) + 1, sizeof(char));
-	memcpy(output, buf, strlen(buf));
+	memcpy(output, buf, strlen(buf) + 1);
 
 	return output;
 }

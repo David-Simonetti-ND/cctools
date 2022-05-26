@@ -5404,6 +5404,7 @@ void work_queue_task_delete(struct work_queue_task *t)
 
 		free(t->command_line);
 		free(t->coprocess);
+		free(t->remote_output);
 		free(t->tag);
 		free(t->category);
 		free(t->output);

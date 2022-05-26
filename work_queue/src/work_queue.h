@@ -140,6 +140,7 @@ struct work_queue_task {
 	char *hostname;                                   /**< The name of the host on which it ran. */
 
 	char *coprocess;                                  /**< The name of the coprocess name in the worker that executes this task. For regular tasks it is NULL. */
+	char *remote_output;							  /**< Contains the json response from a task executed on a coprocess. For regular tasks it is NULL */
 
 	char *category;                         /**< User-provided label for the task. It is expected that all task with the same category will have similar resource usage. See @ref work_queue_task_specify_category. If no explicit category is given, the label "default" is used. **/
 	category_allocation_t resource_request; /**< See @ref category_allocation_t */

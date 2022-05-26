@@ -1950,6 +1950,7 @@ class WorkQueue(object):
             while not self.empty() and n < size:
                 t = self.wait_for_tag(str(i), 1)                
                 if t:
+                    print(t.output)
                     results[tasks[t.id]] = list(json.loads(t.output)["Result"])
                     n += 1
                     break
