@@ -603,10 +603,17 @@ class TxnPlotManager(TxnPlot):
 
 class TxnPlotTasks(TxnPlot):
     def plot(self, fig, manager):
-        library_tasks = manager.tasks.loc[manager.tasks['library'] > 0]
+        library_tasks = manager.tasks.loc[manager.tasks['library'] > 0].copy()
         regular_tasks = manager.tasks.loc[manager.tasks['library'].isnull()].copy()
         regular_tasks.sort_values("time_commit_start", ignore_index=True, inplace=True)
+        library_tasks.sort_values("time_commit_start", ignore_index=True, inplace=True)
+        regular_tasks['task_id'] = list(range(len(regular_tasks.index)))
+        library_tasks['task_id'] = list(range(len(regular_tasks.index), len(regular_tasks.index) + len(library_tasks.index)))
+        library_tasks['time_worker_end'] = manager.termination
+        library_tasks['RETRIEVED'] = manager.termination
         manager.tasks = pd.concat([regular_tasks, library_tasks])
+        manager.tasks.set_index("task_id", inplace=True)
+        print(manager.tasks)
         
 
         # divided tasks on whether we have a full report
